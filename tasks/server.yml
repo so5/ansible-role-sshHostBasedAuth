@@ -35,18 +35,20 @@
     group: root
     mode:  04755
 
-- name: gather host key and store it to facts
-  include_tasks: keyscan.yml
-  with_items: "{{ ssh_hostbased_auth_allowed_ips }}"
-  loop_control:
-    loop_var: target
+- block:
+  - name: gather host key and store it to facts
+    include_tasks: keyscan.yml
+    with_items: "{{ ssh_hostbased_auth_allowed_ips }}"
+    loop_control:
+      loop_var: target
 
-- name: write host keys to known_hosts file
-  copy:
-    dest: "{{ ssh_hostbased_auth_known_hosts }}"
-    content: "{{ host_key }}"
+  - name: write host keys to known_hosts file
+    copy:
+      dest: "{{ ssh_hostbased_auth_known_hosts }}"
+      content: "{{ host_key }}"
 
-- name: write hostnames to shots.equiv file
-  copy:
-    dest: "{{ ssh_hostbased_auth_shosts_equiv }}"
-    content: "{{ ssh_hostbased_auth_allowed_ips | join('\n') }}"
+  - name: write hostnames to shots.equiv file
+    copy:
+      dest: "{{ ssh_hostbased_auth_shosts_equiv }}"
+      content: "{{ ssh_hostbased_auth_allowed_ips | join('\n') }}"
+  when: ssh_hostbased_auth_allowed_ips |length >0
