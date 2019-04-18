@@ -1,7 +1,7 @@
 ssh hostbased auth
 =========
 
-allow ssh hostbased authentication from specified hosts on both root and non-root user.
+allow ssh hostbased authentication from specified hosts
 also set ssh client to use host based auth.
 
 Requirements

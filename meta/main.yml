@@ -1,7 +1,7 @@
 galaxy_info:
-  role_name: ssh-HostbasedAuth
+  role_name: ssh-hostbased-auth
   author: Naoyuki Sogo
-  description:
+  description: set up ssh hostbased authentication
   company: "Long Tail Software LLC"
   license: MIT
   min_ansible_version: 2.4
