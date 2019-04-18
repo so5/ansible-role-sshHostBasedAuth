@@ -1,0 +1,9 @@
+- name: gather host keys
+  command: "ssh-keyscan {{ target }}"
+  register: rt
+  until: rt.stdout
+  retries: 6
+  delay: 10
+
+- set_fact:
+    host_key: "{{ host_key | default('') }}{{ rt.stdout }}\n"

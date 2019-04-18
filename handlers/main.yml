@@ -1,2 +1,6 @@
 ---
 # handlers file for ssh_HostabasedAuth
+- name: restart_sshd
+  systemd:
+    name: sshd
+    state: restarted

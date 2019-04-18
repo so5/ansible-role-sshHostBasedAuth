@@ -1,8 +1,8 @@
 - name: prepend hostbased authentication setting to ssh_config
-  blockkinfile:
+  blockinfile:
     path: "{{ ssh_hostbased_auth_ssh_config }}"
     insertbefore: BOF
     block: |
-    HostBasedAuthentication yes
-    EnableSSHKeysign yes
-    NoHostAuthenticationForLocalhost yes
+      HostBasedAuthentication yes
+      EnableSSHKeysign yes
+      NoHostAuthenticationForLocalhost yes

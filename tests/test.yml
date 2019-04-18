@@ -1,5 +1,7 @@
 ---
 - hosts: localhost
   remote_user: root
+  become: yes
   roles:
-    - ansible-role-ssh_HostbasedAuth
+    - {role: ansible-role-ssh_HostbasedAuth, ssh_hostbased_auth_allowed_hosts: ["localhost"]}
+
