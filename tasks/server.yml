@@ -1,0 +1,58 @@
+- name: prepend hostbased authentication setting to sshd_config
+  blockkinfile:
+    path: "{{ ssh_hostbased_auth_sshd_config }}"
+    insertbefore: BOF
+    block: |
+    HostbasedAuthentication yes
+    PermitRootLogin prohibit-password
+    IgnoreRhosts no
+
+- name: restrict authentication method only to hostbased authentication
+  lineinfile:
+    path: "{{ ssh_hostbased_auth_sshd_config }}"
+    insertbefore: BOF
+    line: AuthenticationMethods hostbased
+  when: "{{ ssh_hostbased_auth_only }}"
+
+- name: change ssh-keysign's permission
+  file:
+    path: "{{ ssh_hostbased_auth_ssh_keysign}}"
+    owner: root
+    group: root
+    mode:  04755
+
+- name: gather host key and store it to facts
+  block:
+    block:
+    - name: gather host keys
+      command: ssh-keyscan "{{ item }}"
+      register: rt
+    - debug: var=rt
+        #TODO item をkeyに入れる
+    - set_fact:
+        host_key: "{{ rt.stdout }}"
+    until: length(ansible_facts['host_key']) > 0
+    retries: 6
+    delay: 10
+  with_items: "{{ ssh_hostbased_auth_allowed_hosts }}"
+
+- debug:
+    var: ansible_facts['host_key']
+
+#TODO 変数からjoinでcontentを取り出す
+
+- name: write host keys to known_hosts file
+  copy:
+    dest: "{{ ssh_hostbased_auth_known_hosts }}"
+    content:
+
+
+
+- name: write hostnames to shots.equiv file
+    copy:
+      dest: "{{ ssh_hostbased_auth_shosts_equiv }}"
+      content: "{{ }}"
+
+- name: write hostnames to root's .shosts file
+    copy:
+      dest: /root/.shosts

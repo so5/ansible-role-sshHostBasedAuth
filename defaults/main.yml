@@ -1,0 +1,4 @@
+ssh_hostbased_auth_allowed_hosts: [] #ip address or hostname of host which will be allowd to access to target machine.
+ssh_hostbased_auth_only: False       #if true, preferred access will be restricted to hostbased authentication
+ssh_hostbased_auth_server: True      #set up server setting
+ssh_hostbased_auth_client: True      #set up client setting (/etc/ssh/ssh_config)
