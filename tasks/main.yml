@@ -1,7 +1,7 @@
 - name: setup sshd and get host key of allowed hosts
-  include_task: server.yml
+  include_tasks: server.yml
   when: "{{ ssh_hostbased_auth_server }}"
 
 - name: rewrite ssh_config to use hostbased authentication from target machine
-  include_task: client.yml
+  include_tasks: client.yml
   when: "{{ ssh_hostbased_auth_client }}"
