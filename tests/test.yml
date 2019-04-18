@@ -3,5 +3,5 @@
   remote_user: root
   become: yes
   roles:
-    - {role: ansible-role-ssh_HostbasedAuth, ssh_hostbased_auth_allowed_hosts: ["localhost"]}
+    - {role: ../.., ssh_hostbased_auth_allowed_hosts: ["localhost"]}
 
