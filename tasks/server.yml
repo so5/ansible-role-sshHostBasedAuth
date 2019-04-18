@@ -1,6 +1,7 @@
-- name: initialize allowed ip address list
+- name: initialize allowed host lists
   set_fact:
     ssh_hostbased_auth_allowed_ips: []
+    ssh_hostbased_auth_allowed_hostnames: []
 
 - name: convert specified allowed hosts to IP address
   set_fact:
@@ -10,6 +11,11 @@
 - name: remove duplicates
   set_fact:
     ssh_hostbased_auth_allowed_ips: "{{ ssh_hostbased_auth_allowed_ips|flatten|unique}}"
+
+- name: convert IP address to hostname
+  set_fact:
+    ssh_hostbased_auth_allowed_hostnames: "{{ ssh_hostbased_auth_allowed_hostnames + [lookup('dig',item,'qtype=PTR')|replace('127.0.0.1','localhost')] }}"
+  loop: "{{ ssh_hostbased_auth_allowed_ips }}"
 
 - name: prepend hostbased authentication setting to sshd_config
   blockinfile:
@@ -38,7 +44,7 @@
 - block:
   - name: gather host key and store it to facts
     include_tasks: keyscan.yml
-    with_items: "{{ ssh_hostbased_auth_allowed_ips }}"
+    with_items: "{{ ssh_hostbased_auth_allowed_ips + ssh_hostbased_auth_allowed_hostnames }}"
     loop_control:
       loop_var: target
 
@@ -50,5 +56,5 @@
   - name: write hostnames to shots.equiv file
     copy:
       dest: "{{ ssh_hostbased_auth_shosts_equiv }}"
-      content: "{{ ssh_hostbased_auth_allowed_ips | join('\n') }}"
+      content: "{{ ssh_hostbased_auth_allowed_ips + ssh_hostbased_auth_allowed_hostnames | join('\n') }}"
   when: ssh_hostbased_auth_allowed_ips |length >0
