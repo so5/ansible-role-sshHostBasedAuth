@@ -1,0 +1,1 @@
+ssh_hostbased_auth_ssh_keysign:  "/usr/lib/openssh/ssh-keysign"

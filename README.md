@@ -23,7 +23,7 @@ ssh_hostbased_auth_keyscan_retry_delay: 10 #delay time between each keyscan
 Dependencies
 ------------
 
-none.
+dnspython package is required.
 
 Example Playbook
 ----------------

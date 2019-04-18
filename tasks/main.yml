@@ -1,3 +1,14 @@
+- name: include OS specific vars.
+  include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+      - "setup-{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+      - "setup-{{ ansible_distribution }}.yml"
+      - "setup-{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml"
+      - "setup-{{ ansible_os_family }}.yml"
+      - "setup.yml"
+      skip: false
+
 - name: setup sshd and get host key of allowed hosts
   include_tasks: server.yml
   when: ssh_hostbased_auth_server

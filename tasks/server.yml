@@ -1,11 +1,23 @@
+- name: initialize allowed ip address list
+  set_fact:
+    ssh_hostbased_auth_allowed_ips: []
+
+- name: convert specified allowed hosts to IP address
+  set_fact:
+    ssh_hostbased_auth_allowed_ips: "{{ ssh_hostbased_auth_allowed_ips + [lookup('dig',item)|replace('NXDOMAIN',item)|replace('localhost','127.0.0.1')] }}"
+  loop: "{{ ssh_hostbased_auth_allowed_hosts }}"
+
+- name: remove duplicates
+  set_fact:
+    ssh_hostbased_auth_allowed_ips: "{{ ssh_hostbased_auth_allowed_ips|flatten|unique}}"
+
 - name: prepend hostbased authentication setting to sshd_config
   blockinfile:
     path: "{{ ssh_hostbased_auth_sshd_config }}"
     insertbefore: BOF
     block: |
       HostbasedAuthentication yes
-      PermitRootLogin prohibit-password
-      IgnoreRhosts no
+      UseDNS no
   notify: restart_sshd
 
 - name: restrict authentication method only to hostbased authentication
@@ -25,7 +37,7 @@
 
 - name: gather host key and store it to facts
   include_tasks: keyscan.yml
-  with_items: "{{ ssh_hostbased_auth_allowed_hosts }}"
+  with_items: "{{ ssh_hostbased_auth_allowed_ips }}"
   loop_control:
     loop_var: target
 
@@ -37,17 +49,4 @@
 - name: write hostnames to shots.equiv file
   copy:
     dest: "{{ ssh_hostbased_auth_shosts_equiv }}"
-    content: "{{ ssh_hostbased_auth_allowed_hosts | join('\n') }}"
-
-- name: write hostnames to root's .shosts file
-  copy:
-    dest: /root/.shosts
-    content: "{{ ssh_hostbased_auth_allowed_hosts | join('\n') }}"
-
-
-
-- debug:
-    var: host_key
-- debug:
-    msg: "{{ ssh_hostbased_auth_allowed_hosts | join('\n') }}"
-
+    content: "{{ ssh_hostbased_auth_allowed_ips | join('\n') }}"
