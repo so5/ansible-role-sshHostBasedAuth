@@ -1,0 +1,18 @@
+galaxy_info:
+  role_name: ssh-HostbasedAuth
+  author: Naoyuki Sogo
+  description:
+  company: "Long Tail Software LLC"
+  license: MIT
+  min_ansible_version: 2.4
+  platforms:
+    - name: Ubuntu
+      versions:
+        - 16
+  galaxy_tags:
+    - ssh
+    - authentication
+    - hostbased
+    - HostbasedAuthentication
+    - auth
+    - passwordless
