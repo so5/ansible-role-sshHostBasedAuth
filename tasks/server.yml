@@ -2,6 +2,7 @@
   set_fact:
     ssh_hostbased_auth_allowed_ips: []
     ssh_hostbased_auth_allowed_hostnames: []
+    ssh_hostbased_auth_allowed_fqdns: []
 
 - name: convert specified allowed hosts to IP address
   set_fact:
@@ -12,10 +13,18 @@
   set_fact:
     ssh_hostbased_auth_allowed_ips: "{{ ssh_hostbased_auth_allowed_ips|flatten|unique}}"
 
-- name: convert IP address to hostname
+- name: convert IP address to fqdn
   set_fact:
-    ssh_hostbased_auth_allowed_hostnames: "{{ ssh_hostbased_auth_allowed_hostnames + [lookup('dig',item,'qtype=PTR').split('.')[0]|replace('127.0.0.1','localhost')] }}"
+    ssh_hostbased_auth_allowed_fqdns: "{{ ssh_hostbased_auth_allowed_fqdns + [lookup('dig',item,'qtype=PTR')|replace('127.0.0.1','localhost')] }}"
   loop: "{{ ssh_hostbased_auth_allowed_ips }}"
+
+- name: convert fqdn to hostname
+  set_fact:
+    ssh_hostbased_auth_allowed_hostnames: "{{ ssh_hostbased_auth_allowed_fqdns |map('split','.')| map('replace', '127.0.0.1','localhost') }}"
+
+- debug: var=ssh_hostbased_auth_allowed_ips
+- debug: var=ssh_hostbased_auth_allowed_fqdns
+- debug: var=ssh_hostbased_auth_allowed_hostnames
 
 - name: prepend hostbased authentication setting to sshd_config
   blockinfile:
