@@ -15,7 +15,7 @@
 
 - name: convert IP address to fqdn
   set_fact:
-    ssh_hostbased_auth_allowed_fqdns: "{{ ssh_hostbased_auth_allowed_fqdns + [lookup('dig',item,'qtype=PTR')|replace('127.0.0.1','localhost')] }}"
+    ssh_hostbased_auth_allowed_fqdns: "{{ ssh_hostbased_auth_allowed_fqdns + [lookup('dig',item,'qtype=PTR').rstrip('.')|replace('127.0.0.1','localhost')] }}"
   loop: "{{ ssh_hostbased_auth_allowed_ips }}"
 
 - name: convert fqdn to hostname
