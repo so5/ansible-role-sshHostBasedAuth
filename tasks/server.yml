@@ -14,7 +14,7 @@
 
 - name: convert IP address to hostname
   set_fact:
-    ssh_hostbased_auth_allowed_hostnames: "{{ ssh_hostbased_auth_allowed_hostnames + [lookup('dig',item,'qtype=PTR')|replace('127.0.0.1','localhost')] }}"
+    ssh_hostbased_auth_allowed_hostnames: "{{ ssh_hostbased_auth_allowed_hostnames + [lookup('dig',item,'qtype=PTR').split('.')[0]|replace('127.0.0.1','localhost')] }}"
   loop: "{{ ssh_hostbased_auth_allowed_ips }}"
 
 - name: prepend hostbased authentication setting to sshd_config
@@ -56,5 +56,5 @@
   - name: write hostnames to shots.equiv file
     copy:
       dest: "{{ ssh_hostbased_auth_shosts_equiv }}"
-      content: "{{ ssh_hostbased_auth_allowed_ips + ssh_hostbased_auth_allowed_hostnames | join('\n') }}"
+      content: "{{ ( ssh_hostbased_auth_allowed_ips + ssh_hostbased_auth_allowed_hostnames ) | join('\n') }}"
   when: ssh_hostbased_auth_allowed_ips |length >0
