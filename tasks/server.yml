@@ -29,7 +29,6 @@
     insertbefore: BOF
     block: |
       HostbasedAuthentication yes
-      UseDNS no
   notify: restart_sshd
 
 - name: restrict authentication method only to hostbased authentication
