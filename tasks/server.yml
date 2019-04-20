@@ -55,7 +55,7 @@
 - block:
   - name: gather host key and store it to facts
     include_tasks: keyscan.yml
-    with_items: "{{ ssh_hostbased_auth_allowed_ips + ssh_hostbased_auth_allowed_hostnames }}"
+    with_items: "{{ ssh_hostbased_auth_allowed_ips + ssh_hostbased_auth_allowed_hostnames + ssh_hostbased_auth_allowed_fqdns }}"
     loop_control:
       loop_var: target
 
@@ -69,7 +69,7 @@
       dest: "{{ ssh_hostbased_auth_shosts_equiv_file }}"
       content: "{{ ( ssh_hostbased_auth_allowed_ips + ssh_hostbased_auth_allowed_hostnames + ssh_hostbased_auth_allowed_fqdns ) | join('\n') }}"
 
-  - name: write hostnames to root/shosts
+  - name: write hostnames to root/.shosts
     copy:
       dest: "/root/.shosts"
       content: "{{ ( ssh_hostbased_auth_allowed_ips + ssh_hostbased_auth_allowed_hostnames + ssh_hostbased_auth_allowed_fqdns ) | join('\n') }}"
