@@ -2,8 +2,8 @@
   command: "ssh-keyscan {{ target }}"
   register: rt
   until: rt.stdout
-  retries: 6
-  delay: 10
+  retries: "{{ ssh_hostbased_auth_keyscan_retry }}"
+  delay:  "{{ ssh_hostbased_auth_keyscan_retry_delay }}"
 
 - set_fact:
     host_key: "{{ host_key | default('') }}{{ rt.stdout }}\n"

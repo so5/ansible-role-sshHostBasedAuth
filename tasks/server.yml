@@ -23,21 +23,27 @@
     ssh_hostbased_auth_allowed_hostnames: "{{ ssh_hostbased_auth_allowed_hostnames + [ item.split('.')[0] ] }}"
   loop: "{{ ssh_hostbased_auth_allowed_fqdns }}"
 
+- name: make sshd setting
+  set_fact:
+    ssh_hostbased_auth_sshd_config: "HostbasedAuthentication yes"
+
+- name: restrict authentication method only to hostbased
+  set_fact:
+    ssh_hostbased_auth_sshd_config: "{{ ssh_hostbased_auth_sshd_config }} \nAuthenticationMethods hostbased"
+  when: ssh_hostbased_auth_only
+
+- name: allow root login
+  set_fact:
+    ssh_hostbased_auth_sshd_config: "{{ ssh_hostbased_auth_sshd_config }} \nPermitRootLogin prohibit-password\nIgnoreRhosts no"
+  when: ssh_hostbased_auth_permit_root_login
+
 - name: prepend hostbased authentication setting to sshd_config
   blockinfile:
-    path: "{{ ssh_hostbased_auth_sshd_config }}"
+    path: "{{ ssh_hostbased_auth_sshd_config_file }}"
     insertbefore: BOF
-    block: |
-      HostbasedAuthentication yes
+    block: "{{ ssh_hostbased_auth_sshd_config }}"
   notify: restart_sshd
 
-- name: restrict authentication method only to hostbased authentication
-  lineinfile:
-    path: "{{ ssh_hostbased_auth_sshd_config }}"
-    insertbefore: BOF
-    line: AuthenticationMethods hostbased
-  when: ssh_hostbased_auth_only
-  notify: restart_sshd
 
 - name: change ssh-keysign's permission
   file:
@@ -55,11 +61,17 @@
 
   - name: write host keys to known_hosts file
     copy:
-      dest: "{{ ssh_hostbased_auth_known_hosts }}"
+      dest: "{{ ssh_hostbased_auth_known_hosts_file }}"
       content: "{{ host_key }}"
 
   - name: write hostnames to shots.equiv file
     copy:
-      dest: "{{ ssh_hostbased_auth_shosts_equiv }}"
+      dest: "{{ ssh_hostbased_auth_shosts_equiv_file }}"
       content: "{{ ( ssh_hostbased_auth_allowed_ips + ssh_hostbased_auth_allowed_hostnames + ssh_hostbased_auth_allowed_fqdns ) | join('\n') }}"
+
+  - name: write hostnames to root/shosts
+    copy:
+      dest: "/root/.shosts"
+      content: "{{ ( ssh_hostbased_auth_allowed_ips + ssh_hostbased_auth_allowed_hostnames + ssh_hostbased_auth_allowed_fqdns ) | join('\n') }}"
+    when: ssh_hostbased_auth_permit_root_login
   when: ssh_hostbased_auth_allowed_ips |length >0
