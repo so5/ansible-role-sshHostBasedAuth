@@ -1,9 +1,8 @@
 - name: call ssh-keyscan with all specified hosts
-  command: "ssh-keyscan {{ ssh_hostbased_auth_scan_hostlist }}"
+  command: "ssh-keyscan {{ ssh_hostbased_auth_scan_hostlist |join(' ')}}"
   register: rt
   
 - debug: var=rt
-- debug: var=ssh_hostbased_auth_scan_hostlist 
   
 - name: store results 
   set_fact:
