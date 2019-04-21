@@ -2,9 +2,14 @@
   command: "ssh-keyscan {{ ssh_hostbased_auth_scan_hostlist }}"
   register: rt
   
+- debug: var=rt
+- debug: var=ssh_hostbased_auth_scan_hostlist 
+  
 - name: store results 
   set_fact:
     host_key: "{{ host_key | default('') }}{{ rt.stdout }}\n"
+    
+- debug: var=host_key
   
 - name: initialize work list for failed hosts
   set_fact:
@@ -17,7 +22,6 @@
   when: item is not search(rt.stdout)
   
 - debug: var=ssh_hostbased_auth_scan_failed_hostlist
-- debug: var=host_key
 
 - name: gather host keys
   command: "ssh-keyscan {{ item }}"
