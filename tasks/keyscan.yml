@@ -14,7 +14,7 @@
   set_fact:
     ssh_hostbased_auth_scan_failed_hostlist: "{{ ssh_hostbased_auth_scan_failed_hostlist + [ item ] }}"
   loop: "{{ ssh_hostbased_auth_scan_hostlist }}"
-  when: item is not in host_key
+  when: item not in host_key
   
 - debug: var=ssh_hostbased_auth_scan_failed_hostlist
 
