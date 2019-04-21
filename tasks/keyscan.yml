@@ -14,8 +14,11 @@
   set_fact:
     ssh_hostbased_auth_scan_failed_hostlist: "{{ ssh_hostbased_auth_scan_failed_hostlist + [ item ] }}"
   loop: "{{ ssh_hostbased_auth_scan_hostlist }}"
-  when: item is search(rt.stdout)
+  when: item is not search(rt.stdout)
   
+- debug: var=ssh_hostbased_auth_scan_failed_hostlist
+- debug: var=host_key
+
 - name: gather host keys
   command: "ssh-keyscan {{ item }}"
   register: rt
