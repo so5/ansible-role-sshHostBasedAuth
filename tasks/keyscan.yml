@@ -1,9 +1,35 @@
-- name: gather host keys
-  command: "ssh-keyscan {{ target }}"
+- name: call ssh-keyscan with all specified hosts
+  command: "ssh-keyscan {{ ssh_hostbased_auth_scan_hostlist }}"
   register: rt
-  until: rt.stdout
-  retries: "{{ ssh_hostbased_auth_keyscan_retry }}"
-  delay:  "{{ ssh_hostbased_auth_keyscan_retry_delay }}"
-
-- set_fact:
+  
+- name: store results 
+  set_fact:
     host_key: "{{ host_key | default('') }}{{ rt.stdout }}\n"
+  
+- name: initialize work list for failed hosts
+  set_fact:
+    ssh_hostbased_auth_scan_failed_hostlist: []
+    
+- name: pickup failed hosts
+  set_fact:
+    ssh_hostbased_auth_scan_failed_hostlist: "{{ ssh_hostbased_auth_scan_failed_hostlist + [ item ] }}"
+  loop: "{{ ssh_hostbased_auth_scan_hostlist }}"
+  when: item is search(rt.stdout)
+  
+- debug: var=ssh_hostbased_auth_scan_failed_hostlist
+- debug: var=host_key
+
+- block:
+  - name: gather host keys
+    command: "ssh-keyscan {{ item }}"
+    register: rt
+    until: rt.results[item].stdout
+    retries: "{{ ssh_hostbased_auth_keyscan_retry }}"
+    delay:  "{{ ssh_hostbased_auth_keyscan_retry_delay }}"
+    loop: "{{ ssh_hostbased_auth_scan_failed_hostlist }}"
+  
+  - set_fact:
+      host_key: "{{ host_key | default('') }}{{ item.stdout }}\n"
+    loop: "{{ rt.results }}"
+    
+- debug: var=host_key
