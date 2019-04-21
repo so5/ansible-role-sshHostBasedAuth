@@ -2,14 +2,10 @@
   command: "ssh-keyscan {{ ssh_hostbased_auth_scan_hostlist |join(' ')}}"
   register: rt
   
-- debug: var=rt
-  
 - name: store results 
   set_fact:
     host_key: "{{ host_key | default('') }}{{ rt.stdout }}\n"
     
-- debug: var=host_key
-  
 - name: initialize work list for failed hosts
   set_fact:
     ssh_hostbased_auth_scan_failed_hostlist: []
@@ -18,7 +14,7 @@
   set_fact:
     ssh_hostbased_auth_scan_failed_hostlist: "{{ ssh_hostbased_auth_scan_failed_hostlist + [ item ] }}"
   loop: "{{ ssh_hostbased_auth_scan_hostlist }}"
-  when: item is not search(rt.stdout)
+  when: item is not in host_key
   
 - debug: var=ssh_hostbased_auth_scan_failed_hostlist
 
