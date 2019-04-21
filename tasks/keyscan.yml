@@ -19,17 +19,18 @@
 - debug: var=ssh_hostbased_auth_scan_failed_hostlist
 - debug: var=host_key
 
-- block:
-  - name: gather host keys
-    command: "ssh-keyscan {{ item }}"
-    register: rt
-    until: rt.results[item].stdout
-    retries: "{{ ssh_hostbased_auth_keyscan_retry }}"
-    delay:  "{{ ssh_hostbased_auth_keyscan_retry_delay }}"
-    loop: "{{ ssh_hostbased_auth_scan_failed_hostlist }}"
+- name: gather host keys
+  command: "ssh-keyscan {{ item }}"
+  register: rt
+  until: rt.stdout
+  retries: "{{ ssh_hostbased_auth_keyscan_retry }}"
+  delay:  "{{ ssh_hostbased_auth_keyscan_retry_delay }}"
+  loop: "{{ ssh_hostbased_auth_scan_failed_hostlist }}"
   
-  - set_fact:
-      host_key: "{{ host_key | default('') }}{{ item.stdout }}\n"
-    loop: "{{ rt.results }}"
+- debug: var=rt
+
+- set_fact:
+    host_key: "{{ host_key | default('') }}{{ item.stdout }}\n"
+  loop: "{{ rt.results }}"
     
 - debug: var=host_key
